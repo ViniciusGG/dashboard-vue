@@ -1,11 +1,14 @@
 <script setup>
-import { useRoute, RouterLink } from 'vue-router';
+import { useRoute, RouterLink, useRouter } from 'vue-router';
 import PulseLoader from 'vue-spinner/src/PulseLoader.vue';
 import { reactive, onMounted } from 'vue';
 import BackButton from '../components/BackButton.vue';
 import axios from 'axios';
+import { useToast } from 'vue-toastification';
 
 const route = useRoute();
+const router = useRouter();
+const toast = useToast();
 
 const jobId = route.params.id;
 
@@ -13,6 +16,19 @@ const state = reactive({
   job: {},
   isLoading: true,
 });
+
+const deleteJob = async () => {
+  try {
+    const confirm = window.confirm('Are you sure you want to delete this job?');
+    if (!confirm) return;
+    await axios.delete(`/api/jobs/${jobId}`);
+    toast.success('Job deleted successfully');
+    router.push('/jobs');
+  } catch (error) {
+    console.error('Error deleting job', error);
+    toast.error('Error deleting job');
+  }
+};
 
 onMounted(async () => {
   try {
@@ -37,7 +53,7 @@ onMounted(async () => {
             <div class="text-gray-500 mb-4">{{ state.job.type }}</div>
             <h1 class="text-3xl font-bold mb-4">{{ state.job.title }}</h1>
             <div class="text-gray-500 mb-4 flex align-middle justify-center md:justify-start">
-              <i class="fa-solid fa-location-dot text-lg text-orange-700 mr-2"></i>
+              <i class="pi pi-map-marker text-xl text-orange-700 mr-2"></i>
               <p class="text-orange-700">{{ state.job.location }}</p>
             </div>
           </div>
@@ -87,12 +103,12 @@ onMounted(async () => {
           <!-- Manage -->
           <div class="bg-white p-6 rounded-lg shadow-md mt-6">
             <h3 class="text-xl font-bold mb-6">Manage Job</h3>
-            <RouterLink 
+            <RouterLink
               :to="`/jobs/edit/${state.job.id}`"
               class="bg-green-500 hover:bg-green-600 text-white text-center font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block">
               Edit Job
             </RouterLink>
-            <button
+            <button @click="deleteJob"
               class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block">
               Delete Job
             </button>
