@@ -9,10 +9,10 @@ export default defineConfig({
     vue(),
   ],
   server: {
-    port: 3000,
+    port: process.env.VITE_APP_PORT || 3000,
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: process.env.VITE_API_URL || 'https://api-dashboard-vue.onrender.com',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
       }
